@@ -99,18 +99,23 @@
 #         return False
 
 from django.contrib import admin
-from .models import CustomUser, Department, StudentProfile, StudentLoginRecord
+from .models import CustomUser, Department, StudentProfile, StudentLoginRecord, ProfessorProfile
+
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
     list_display = ('email', 'role', 'verification_status', 'is_active')
     list_filter = ('role', 'verification_status')
+    list_editable = ('role',)
     actions = ['approve_professors']
 
     def approve_professors(self, request, queryset):
         queryset.update(verification_status='APPROVED', is_active=True)
+
     approve_professors.short_description = "Approve selected Professors"
+
 
 admin.site.register(Department)
 admin.site.register(StudentProfile)
 admin.site.register(StudentLoginRecord)
+admin.site.register(ProfessorProfile)

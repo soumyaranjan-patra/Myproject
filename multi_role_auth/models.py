@@ -196,6 +196,8 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
+
         return self.create_user(email, password, **extra_fields)
 
 
@@ -216,8 +218,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
     verification_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -239,6 +243,21 @@ class StudentProfile(models.Model):
     name = models.CharField(max_length=100)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.roll_no
+
+
+# ----------------------
+# Professor Profile
+# ----------------------
+class ProfessorProfile(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    cabin_number = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"Prof. {self.user.email}"
+
 
 # ----------------------
 # Login Record
@@ -247,3 +266,6 @@ class StudentLoginRecord(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
     login_at = models.DateTimeField(auto_now_add=True)
     department = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.student.roll_no} - {self.login_at}"
